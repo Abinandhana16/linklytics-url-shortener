@@ -20,7 +20,7 @@ graph TD
     Client[Client Browser / Device]
     Frontend[Frontend: React + Vite + Tailwind]
     Backend[Backend: Express.js + Node.js]
-    DB[(MongoDB Atlas)]
+    DB[(MongoDB compass)]
 
     Client -->|1. User interactions & forms| Frontend
     Client -->|4. Visits Short Link| Backend
@@ -44,6 +44,13 @@ graph TD
     AnalyticsEngine -.-> DB
     RedirectController -.-> DB
 ```
+
+### Architecture Explanation
+The application follows a standard decoupled client-server architecture:
+- **Frontend (React/Vite):** Operates as a Single Page Application (SPA) handling user interactions, routing, and data visualization (via Recharts). It communicates securely with the backend using JWTs.
+- **Backend (Node.js/Express):** Provides a robust REST API. It consists of modular services: an Auth Service for user management, a URL Service for generating unique short codes (via NanoID), and an Analytics Engine for parsing visitor data.
+- **Database (MongoDB):** The primary data store. It maps original URLs to short codes and maintains individual click event records for time-series aggregation.
+- **Redirection Engine:** When a user visits a short link, the Express server intercepts the request, quickly resolves the original URL, and issues a rapid `302 Found` redirect. Analytics tracking (like User-Agent parsing and click counting) is handled asynchronously to ensure the fastest possible user redirection.
 
 ---
 
@@ -89,15 +96,6 @@ npm run dev
 ```
 - The **Frontend** will be running at: `http://localhost:5173`
 - The **Backend API** will be running at: `http://localhost:5000`
-
----
-
-## 🧠 Assumptions Made
-
-- **Traffic Scale:** The app assumes that the `nanoid` 6-character short code generator will not encounter massive collision rates under standard hackathon testing loads. Collision retry logic handles edge cases.
-- **Local Analytics Fallback:** Geolocation and IP tracking uses mock fallbacks for local environments (`localhost` / `127.0.0.1`) to ensure the analytics dashboard populates beautifully during local presentations without needing a public IP.
-- **Client Capabilities:** Clients visiting the short link have standard browsers. While the 302 redirect happens entirely server-side, the frontend dashboard requires Javascript to render the analytical charts (Recharts).
-- **Environment:** The `npm run dev` script assumes you are running the project from the root folder containing both `frontend` and `backend` directories.
 
 ---
 
